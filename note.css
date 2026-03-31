@@ -1,0 +1,324 @@
+/* ============================================================
+   STICKY NOTE STYLES
+   ============================================================ */
+
+@font-face {
+  font-family: 'Caveat';
+  src: url('assets/fonts/Caveat-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Caveat';
+  src: url('assets/fonts/Caveat-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 250px;
+  height: 250px;
+  overflow: hidden;
+  background: transparent;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+/* ---- NOTE BASE ---- */
+.note {
+  position: relative;
+  width: 242px;
+  height: 242px;
+  margin: 4px;
+  background: #FDFD96;
+  border-radius: 3px;
+  box-shadow:
+    2px 2px 6px rgba(0, 0, 0, 0.25),
+    4px 4px 12px rgba(0, 0, 0, 0.12);
+  opacity: 0.92;
+  overflow: hidden;
+
+  /* Ruled-paper background lines */
+  background-image:
+    linear-gradient(#FDFD96 0px, #FDFD96 0px),
+    repeating-linear-gradient(
+      transparent,
+      transparent 34px,
+      rgba(0, 0, 0, 0.06) 34px,
+      rgba(0, 0, 0, 0.06) 35px
+    );
+  background-position: 0 0, 0 45px;
+
+  transition:
+    opacity 0.6s ease,
+    transform 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+/* ---- CLOSE BUTTON ---- */
+.close-btn {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0.35);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+  -webkit-app-region: no-drag;
+  z-index: 10;
+}
+
+.note:hover .close-btn {
+  opacity: 1;
+}
+
+.close-btn:hover {
+  background: rgba(200, 0, 0, 0.15);
+  color: rgba(180, 0, 0, 0.8);
+}
+
+/* ---- TEXT AREA ---- */
+.text-area {
+  position: absolute;
+  top: 28px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  font-family: 'Caveat', cursive;
+  font-size: 22px;
+  font-weight: 400;
+  color: #2c2c2c;
+  line-height: 1.59; /* aligns to the 35px ruled lines */
+  letter-spacing: 0.4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  outline: none;
+  border: none;
+  background: transparent;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  -webkit-app-region: no-drag;
+  cursor: text;
+
+  /* Thin custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(180, 170, 60, 0.4) transparent;
+}
+
+.text-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+.text-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.text-area::-webkit-scrollbar-thumb {
+  background: rgba(180, 170, 60, 0.4);
+  border-radius: 2px;
+}
+
+/* ---- STRUCK CHARACTERS ---- */
+.text-area .struck {
+  text-decoration: line-through;
+  text-decoration-style: wavy;
+  text-decoration-color: rgba(180, 40, 40, 0.7);
+  text-decoration-thickness: 2px;
+  opacity: 0.6;
+}
+
+/* ---- PEEL CORNER ---- */
+.peel-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  transition: width 0.5s ease, height 0.5s ease;
+  z-index: 5;
+}
+
+.peel-corner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    225deg,
+    rgba(220, 210, 60, 0.9) 0%,
+    rgba(200, 190, 50, 0.7) 40%,
+    transparent 60%
+  );
+  clip-path: polygon(100% 0%, 0% 0%, 100% 100%);
+}
+
+/* Stickiness level states applied via JS */
+.note.stickiness-high {
+  /* 76-100% — default */
+  --peel-size: 0px;
+}
+
+.note.stickiness-medium {
+  /* 51-75% */
+  transform: perspective(600px) rotateX(-0.5deg) rotateY(0.8deg);
+}
+
+.note.stickiness-low {
+  /* 26-50% */
+  transform: perspective(600px) rotateX(-1deg) rotateY(1.5deg);
+}
+
+.note.stickiness-critical {
+  /* 1-25% */
+  transform: perspective(600px) rotateX(-2deg) rotateY(3deg);
+}
+
+/* ---- FALLEN STATE ---- */
+.note.fallen {
+  cursor: default;
+  opacity: var(--fallen-opacity, 0.78);
+}
+
+/* ---- CRUMPLE OVERLAY (wrinkle lines + container) ---- */
+.crumple-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.crumple-overlay svg {
+  width: 100%;
+  height: 100%;
+}
+
+.crumple-overlay .wrinkle {
+  stroke: rgba(120, 100, 20, 0);
+  stroke-width: 1;
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke 0.5s ease, stroke-width 0.5s ease;
+}
+
+/* When crumpling, wrinkle lines fade in */
+.note.crumpling .crumple-overlay {
+  opacity: 1;
+}
+
+.note.crumpling .wrinkle {
+  stroke: rgba(120, 100, 20, 0.25);
+  stroke-width: 1.5;
+}
+
+/* Crumple-to-ball keyframes: note scrunches into a paper ball */
+@keyframes crumple {
+  0% {
+    transform: none;
+    border-radius: 3px;
+    box-shadow:
+      2px 2px 6px rgba(0, 0, 0, 0.25),
+      4px 4px 12px rgba(0, 0, 0, 0.12);
+    filter: none;
+  }
+  15% {
+    transform: scale(0.85) rotate(-4deg);
+    border-radius: 8%;
+    filter: brightness(0.95);
+  }
+  35% {
+    transform: scale(0.6) rotate(8deg);
+    border-radius: 20%;
+    box-shadow:
+      1px 1px 4px rgba(0, 0, 0, 0.3),
+      2px 3px 8px rgba(0, 0, 0, 0.15);
+    filter: brightness(0.9);
+  }
+  55% {
+    transform: scale(0.4) rotate(-6deg);
+    border-radius: 35%;
+    filter: brightness(0.85);
+  }
+  75% {
+    transform: scale(0.28) rotate(10deg);
+    border-radius: 45%;
+    box-shadow:
+      0px 1px 4px rgba(0, 0, 0, 0.4),
+      inset 0 0 12px rgba(0, 0, 0, 0.15);
+    filter: brightness(0.82) contrast(1.08);
+  }
+  100% {
+    transform: scale(0.24) rotate(-5deg);
+    border-radius: 50%;
+    box-shadow:
+      0px 1px 3px rgba(0, 0, 0, 0.45),
+      inset 0 0 18px rgba(0, 0, 0, 0.2);
+    filter: brightness(0.78) contrast(1.1);
+  }
+}
+
+.note.crumpling {
+  animation: crumple 1s ease-in forwards;
+  transform-origin: center center;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Hide text as it crumples */
+.note.crumpling .text-area {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.note.crumpling .close-btn {
+  opacity: 0 !important;
+}
+
+/* ---- Crumpled ball resting state (after landing) ---- */
+.note.crumpled {
+  pointer-events: auto;
+  border-radius: 50%;
+  overflow: hidden;
+  filter: brightness(0.78) contrast(1.1);
+  box-shadow:
+    0px 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 0 18px rgba(0, 0, 0, 0.2);
+}
+
+.note.crumpled .text-area {
+  opacity: 0;
+}
+
+.note.crumpled .close-btn {
+  opacity: 0 !important;
+}
+
+.note.crumpled .crumple-overlay {
+  opacity: 1;
+}
+
+.note.crumpled .wrinkle {
+  stroke: rgba(120, 100, 20, 0.3);
+  stroke-width: 2;
+}

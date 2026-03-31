@@ -1,0 +1,19 @@
+{
+  "name": "realisticky-notes",
+  "version": "1.0.0",
+  "description": "Desktop sticky notes with real physics — wind, stickiness decay, crumple, and fall",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "electron": "^41.1.0",
+    "systeminformation": "^5.31.5"
+  },
+  "devDependencies": {}
+}
