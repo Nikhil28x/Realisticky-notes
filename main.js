@@ -34,6 +34,7 @@ let stateManager = null;
 let stickinessManager = null;
 let fanMonitor = null;
 let nextOffsetIndex = 0;
+let lastFanStatus = { active: false, intensity: 0 };
 
 // -------------------------------------------------------------------
 // Window creation
@@ -76,6 +77,10 @@ function createNoteWindow(noteData) {
 
   win.on('will-move', () => {
     clearTimeout(moveTimer);
+    // Pause sway while user is dragging so it doesn't fight the drag
+    if (!programmaticMove) {
+      stopSway(noteData.id);
+    }
   });
 
   win.on('moved', () => {
@@ -88,6 +93,10 @@ function createNoteWindow(noteData) {
       noteData.y = y;
       stickinessManager.applyMovePenalty(noteData.id);
       stateManager.save(buildState());
+      // Restart sway from new position if fan is active
+      if (lastFanStatus.active && noteData.status === 'stuck') {
+        startSwayForNote(noteData.id, lastFanStatus.intensity, noteData.stickiness);
+      }
     }, 150);
   });
 
@@ -417,6 +426,7 @@ app.whenReady().then(() => {
 
   // Fan monitor
   fanMonitor = new FanMonitor(CONSTANTS, (status) => {
+    lastFanStatus = status;
     // Broadcast fan status to all renderers (for stickiness visual updates)
     for (const [, entry] of notes) {
       if (!entry.window.isDestroyed()) {
